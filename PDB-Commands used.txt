@@ -1,0 +1,90 @@
+Microsoft Windows [Version 10.0.19045.6332]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\user>sqlplus / as sysdba
+
+SQL*Plus: Release 21.0.0.0.0 - Production on Mon Oct 6 16:04:43 2025
+Version 21.3.0.0.0
+
+Copyright (c) 1982, 2021, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+
+SQL> SELECT name FROM v$datafile WHERE con_id = 2;
+
+NAME
+--------------------------------------------------------------------------------
+C:\APP\USER\PRODUCT\21C\ORADATA\XE\PDBSEED\SYSTEM01.DBF
+C:\APP\USER\PRODUCT\21C\ORADATA\XE\PDBSEED\SYSAUX01.DBF
+C:\APP\USER\PRODUCT\21C\ORADATA\XE\PDBSEED\UNDOTBS01.DBF
+
+SQL> CREATE PLUGGABLE DATABASE li_pdb_28410
+  2  ADMIN USER liesse_plsqlauca_28410 IDENTIFIED BY liesse04
+  3  ROLES = (dba)
+  4  FILE_NAME_CONVERT = ('C:\APP\USER\PRODUCT\21C\ORADATA\XE\PDBSEED\', 'C:\APP\USER\PRODUCT\21C\ORADATA\XE\li_pdb_28410\');
+
+Pluggable database created.
+
+SQL> ALTER PLUGGABLE DATABASE li_pdb_28410 OPEN;
+
+Pluggable database altered.
+
+SQL> SELECT NAME, OPEN_MODE FROM V$PDBS;
+
+NAME
+--------------------------------------------------------------------------------
+OPEN_MODE
+----------
+PDB$SEED
+READ ONLY
+
+XEPDB1
+READ WRITE
+
+LI_PDB_28410
+READ WRITE
+
+
+SQL> CONNECT sys/your_sys_password AS SYSDBA;
+Connected.
+SQL> CREATE PLUGGABLE DATABASE li_to_delete_pdb_28410
+  2  ADMIN USER liesse_admin_28410 IDENTIFIED BY liesse04
+  3  ROLES = (DBA)
+  4  FILE_NAME_CONVERT = ('C:\APP\USER\PRODUCT\21C\ORADATA\XE\PDBSEED\', 'C:\APP\USER\PRODUCT\21C\ORADATA\XE\li_to_delete_pdb_28410\');
+
+Pluggable database created.
+
+SQL> ALTER PLUGGABLE DATABASE li_to_delete_pdb_28410 OPEN;
+
+Pluggable database altered.
+
+SQL> ALTER PLUGGABLE DATABASE li_to_delete_pdb_28410 CLOSE IMMEDIATE;
+
+Pluggable database altered.
+
+SQL> DROP PLUGGABLE DATABASE li_to_delete_pdb_28410 INCLUDING DATAFILES;
+
+Pluggable database dropped.
+
+SQL> SHOW PDBS;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         3 XEPDB1                         READ WRITE NO
+         4 LI_PDB_28410                   READ WRITE NO
+SQL> CONNECT sys/your_sys_password AS SYSDBA;
+Connected.
+SQL> ALTER SESSION SET CONTAINER = li_pdb_28410;
+
+Session altered.
+
+SQL> EXEC DBMS_XDB_CONFIG.SETHTTPSPORT(5501);
+
+PL/SQL procedure successfully completed.
+
+SQL>
